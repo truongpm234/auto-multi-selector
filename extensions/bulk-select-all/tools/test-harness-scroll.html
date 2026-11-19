@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <title>Bulk Select All — scroll to bottom test</title>
+    <style>
+      body { font: 13px system-ui, sans-serif; margin: 0; background: #111; color: #eee; }
+      .rows { height: 240px; overflow-y: auto; border: 1px solid #333; }
+      .row { display: flex; align-items: center; gap: 10px; padding: 5px 10px; border-bottom: 1px solid #262626; }
+      #out { padding: 12px; font-size: 15px; font-weight: 700; color: #4ade80; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div id="out">RUNNING</div>
+    <div class="rows" id="rows"></div>
+
+    <script>
+      /* ---- giả lập chrome.* cho content.js ---- */
+      let bsaListener = null;
+      window.chrome = {
+        storage: {
+          local: {
+            get: function (key, cb) {
+              cb({
+                bsa: {
+                  autoScroll: true,
+                  preferHeaderSelectAll: false,
+                  restoreScroll: false,
+                  clickDelay: 0,
+                  stepDelay: 40,
+                  maxDuration: 40000,
+                  idleRounds: 3,
+                  maxSteps: 400,
+                  scrollStepPct: 0.85,
+                  autoRunHosts: [],
+                  autoRunDelay: 100,
+                  autoRunWait: 1000,
+                  panelPos: null,
+                  panelCollapsed: true
+                }
+              });
+            },
+            set: function () {}
+          },
+          onChanged: { addListener: function () {} }
+        },
+        runtime: {
+          onMessage: {
+            addListener: function (fn) {
+              bsaListener = fn;
+            }
+          },
+          sendMessage: function () {},
+          lastError: undefined
+        }
+      };
+
+      /* ---- danh sách lazy-load: 40 dòng đầu, cuộn gần đáy thì thêm 20 dòng, tối đa 100 ---- */
+      const MAX = 100;
+      let total = 0;
+      const rowsEl = document.getElementById('rows');
+
+      function addRows(n) {
+        for (let i = 0; i < n; i++) {
+          total++;
+          const row = document.createElement('div');
+          row.className = 'row';
+          row.innerHTML =
+            '<span>ROW ' + total + '</span><span>IMG' + (90000 + total) + '.jpg</span>' +
+            '<input type="checkbox" class="row-cb">';
+          rowsEl.appendChild(row);
+        }
+      }
+
+      addRows(40);
+
+      function tryLoadMore() {
+        const nearBottom = rowsEl.scrollTop + rowsEl.clientHeight >= rowsEl.scrollHeight - 120;
+        if (nearBottom && total < MAX) addRows(Math.min(20, MAX - total));
+      }
+
+      rowsEl.addEventListener('scroll', tryLoadMore);
+      /* dự phòng cho môi trường headless: kiểm tra định kỳ như một số trang thật */
+      setInterval(tryLoadMore, 60);
+    </script>
+
+    <script src="../content.js"></script>
+
+    <script>
+      const out = document.getElementById('out');
+
+      function rowBoxes() {
+        return Array.prototype.slice.call(document.querySelectorAll('.row-cb'));
+      }
+
+      function call(action, options) {
+        return new Promise(function (resolve) {
+          bsaListener({ source: 'BSA', type: 'RUN', action: action, options: options || {} }, {}, resolve);
+        });
+      }
+
+      setTimeout(async function () {
+        const res = await call('select-scroll-bottom', {});
+        const boxes = rowBoxes();
+        const checked = boxes.filter(function (b) {
+          return b.checked;
+        }).length;
+        const atBottom = rowsEl.scrollTop >= rowsEl.scrollHeight - rowsEl.clientHeight - 4;
+        const pass = boxes.length === 100 && checked === 100 && atBottom && res.ok === true;
+        out.textContent =
+          (pass ? 'PASS ' : 'FAIL ') +
+          'rows=' + boxes.length + ' checked=' + checked +
+          ' atBottom=' + atBottom +
+          ' scrollPercent=' + res.scrollPercent +
+          ' clicked=' + res.clicked +
+          ' stepsMs=' + res.ms;
+      }, 400);
+    </script>
+  </body>
+</html>

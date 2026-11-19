@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <title>Bulk Select All — header test</title>
+    <style>
+      body { font: 13px system-ui, sans-serif; margin: 0; background: #111; color: #eee; }
+      table { border-collapse: collapse; width: 520px; margin: 8px; }
+      th, td { border-bottom: 1px solid #2a2a2a; padding: 6px 10px; text-align: left; }
+      th { background: #1b1b1b; }
+      #out { padding: 12px; font-size: 15px; font-weight: 700; color: #4ade80; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div id="out">RUNNING</div>
+    <table>
+      <thead>
+        <tr>
+          <th>File Name</th>
+          <th>Select <input type="checkbox" id="selectAll" aria-label="Select all" /></th>
+        </tr>
+      </thead>
+      <tbody id="body"></tbody>
+    </table>
+
+    <script>
+      let bsaListener = null;
+      window.chrome = {
+        storage: {
+          local: {
+            get: function (key, cb) {
+              cb({
+                bsa: {
+                  autoScroll: false,
+                  preferHeaderSelectAll: true,
+                  restoreScroll: false,
+                  clickDelay: 0,
+                  stepDelay: 40,
+                  maxDuration: 20000,
+                  autoRunHosts: [],
+                  autoRunDelay: 100,
+                  autoRunWait: 1000,
+                  panelPos: null,
+                  panelCollapsed: true
+                }
+              });
+            },
+            set: function () {}
+          },
+          onChanged: { addListener: function () {} }
+        },
+        runtime: {
+          onMessage: {
+            addListener: function (fn) {
+              bsaListener = fn;
+            }
+          },
+          sendMessage: function () {},
+          lastError: undefined
+        }
+      };
+
+      const bodyEl = document.getElementById('body');
+      for (let i = 1; i <= 40; i++) {
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td>NOTO' + (20000 + i) + '.jpg</td><td><input type="checkbox" class="row-cb"></td>';
+        bodyEl.appendChild(tr);
+      }
+
+      /* Giả lập hành vi "chọn tất cả" thật của trang */
+      const selectAll = document.getElementById('selectAll');
+      selectAll.addEventListener('click', function () {
+        const state = selectAll.checked;
+        document.querySelectorAll('.row-cb').forEach(function (cb) {
+          cb.checked = state;
+        });
+      });
+    </script>
+
+    <script src="../content.js"></script>
+
+    <script>
+      const out = document.getElementById('out');
+      const results = [];
+
+      function rows(sel) {
+        return Array.prototype.slice.call(document.querySelectorAll(sel));
+      }
+      function checkedCount(sel) {
+        return rows(sel).filter(function (b) {
+          return b.checked;
+        }).length;
+      }
+      function call(action, options) {
+        return new Promise(function (resolve) {
+          bsaListener({ source: 'BSA', type: 'RUN', action: action, options: options || {} }, {}, resolve);
+        });
+      }
+
+      setTimeout(async function () {
+        /* Test 1: bấm ô Select all trên header */
+        const res1 = await call('select', { autoScroll: false });
+        results.push(
+          'select headerUsed=' + res1.headerUsed +
+          ' rows=' + checkedCount('.row-cb') + '/40' +
+          ' headerChecked=' + document.getElementById('selectAll').checked
+        );
+
+        /* Test 2: bỏ chọn qua header */
+        const res2 = await call('clear', { autoScroll: false });
+        results.push(
+          'clear headerUsed=' + res2.headerUsed +
+          ' rows=' + checkedCount('.row-cb') + '/40' +
+          ' headerChecked=' + document.getElementById('selectAll').checked
+        );
+
+        /* Test 3: đảo chọn toàn bộ */
+        const res3 = await call('invert', { autoScroll: false });
+        results.push('invert clicked=' + res3.clicked + ' rows=' + checkedCount('.row-cb') + '/40');
+
+        const pass =
+          res1.headerUsed === true &&
+          checkedCount('.row-cb') === 40 &&
+          results[1].indexOf('rows=0/40') > -1 &&
+          results[2].indexOf('rows=40/40') > -1;
+
+        out.textContent = (pass ? 'PASS ' : 'FAIL ') + results.join(' | ');
+      }, 400);
+    </script>
+  </body>
+</html>

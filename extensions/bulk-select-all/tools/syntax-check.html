@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <title>Syntax check</title>
+    <style>
+      body { font: 14px/1.6 monospace; background: #111; color: #eee; padding: 12px; white-space: pre-wrap; }
+      .ok { color: #4ade80; }
+      .bad { color: #f87171; }
+    </style>
+  </head>
+  <body>
+    <div id="out">CHECKING</div>
+    <script>
+      const files = ['../content.js', '../background.js', '../popup.js'];
+      const out = document.getElementById('out');
+      const lines = [];
+
+      (async function () {
+        for (const file of files) {
+          try {
+            const res = await fetch(file, { cache: 'no-store' });
+            const text = await res.text();
+            /* new Function chỉ PARSE, không thực thi -> phát hiện SyntaxError */
+            new Function(text);
+            lines.push('<span class="ok">OK</span> ' + file + ' (' + text.length + ' bytes)');
+          } catch (e) {
+            lines.push('<span class="bad">ERROR</span> ' + file + ' -> ' + (e && e.message));
+          }
+        }
+        /* kiểm tra manifest JSON hợp lệ */
+        try {
+          const res = await fetch('../manifest.json', { cache: 'no-store' });
+          const json = JSON.parse(await res.text());
+          lines.push('<span class="ok">OK</span> manifest.json v' + json.manifest_version + ' — ' + json.name);
+        } catch (e) {
+          lines.push('<span class="bad">ERROR</span> manifest.json -> ' + (e && e.message));
+        }
+        out.innerHTML = lines.join('\n');
+        document.title = 'DONE';
+      })();
+    </script>
+  </body>
+</html>

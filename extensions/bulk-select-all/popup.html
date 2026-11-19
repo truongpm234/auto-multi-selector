@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bulk Select All</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="head">
+      <img class="logo" src="icons/icon48.png" alt="" />
+      <div class="head-text">
+        <h1>Bulk Select All</h1>
+        <p id="site">Checking page…</p>
+      </div>
+    </header>
+
+    <div id="status" class="status">Checking page…</div>
+
+    <div class="grid">
+      <button class="btn primary wide" data-act="select-scroll-bottom" data-scroll="1" data-bottom="1">
+        Select + scroll to bottom
+      </button>
+      <button class="btn" data-act="select" data-scroll="1">Select all</button>
+      <button class="btn" data-act="select" data-scroll="0">Select visible</button>
+      <button class="btn" data-act="invert" data-scroll="1">Invert</button>
+      <button class="btn" data-act="clear" data-scroll="0">Unselect all</button>
+    </div>
+
+    <label class="switch">
+      <input type="checkbox" id="auto" />
+      <span>Auto-select on page load</span>
+    </label>
+
+    <details class="adv">
+      <summary>Advanced settings</summary>
+
+      <label class="field">
+        <span>Delay between clicks</span>
+        <input type="number" id="clickDelay" min="0" max="500" step="5" />
+        <em>ms</em>
+      </label>
+
+      <label class="field">
+        <span>Wait per scroll step</span>
+        <input type="number" id="stepDelay" min="100" max="3000" step="50" />
+        <em>ms</em>
+      </label>
+
+      <label class="field">
+        <span>Idle rounds at bottom</span>
+        <input type="number" id="idleRounds" min="1" max="20" step="1" />
+        <em>rounds</em>
+      </label>
+
+      <label class="switch small">
+        <input type="checkbox" id="preferHeader" />
+        <span>Prefer the page's own “Select all” box</span>
+      </label>
+
+      <label class="switch small">
+        <input type="checkbox" id="autoScroll" />
+        <span>Auto-scroll while selecting (long lists)</span>
+      </label>
+
+      <label class="switch small">
+        <input type="checkbox" id="restoreScroll" />
+        <span>Restore scroll position when done</span>
+      </label>
+    </details>
+
+    <div class="row">
+      <button class="ghost" id="showPanel">Show floating panel</button>
+      <button class="ghost" id="reload">Reload page</button>
+    </div>
+
+    <footer class="foot">
+      Shortcut: <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd>
+    </footer>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

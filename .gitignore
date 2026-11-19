@@ -1,0 +1,18 @@
+# Build artifacts
+*.zip
+*.crx
+*.pem
+
+# Logs and test output
+*.log
+tools/*.txt
+tools/e2e.*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Legacy local copy (the extension now lives in extensions/bulk-select-all)
+/auto-multi-select/

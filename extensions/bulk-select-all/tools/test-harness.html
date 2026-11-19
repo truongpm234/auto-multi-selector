@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <title>Bulk Select All — test harness</title>
+    <style>
+      body { font: 13px system-ui, sans-serif; margin: 0; background: #111; color: #eee; }
+      .rows { height: 260px; overflow: auto; border: 1px solid #333; }
+      .row { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-bottom: 1px solid #2a2a2a; }
+      #out { padding: 12px; font-size: 16px; font-weight: 700; color: #4ade80; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <div id="out">RUNNING</div>
+    <div class="rows" id="rows"></div>
+
+    <script>
+      /* Giả lập API chrome để content.js chạy được ngoài extension */
+      let bsaListener = null;
+      window.chrome = {
+        storage: {
+          local: {
+            get: function (key, cb) {
+              cb({
+                bsa: {
+                  autoScroll: true,
+                  preferHeaderSelectAll: true,
+                  restoreScroll: false,
+                  clickDelay: 0,
+                  stepDelay: 40,
+                  maxDuration: 20000,
+                  autoRunHosts: [],
+                  autoRunDelay: 100,
+                  autoRunWait: 1000,
+                  panelPos: null,
+                  panelCollapsed: true
+                }
+              });
+            },
+            set: function () {}
+          },
+          onChanged: { addListener: function () {} }
+        },
+        runtime: {
+          onMessage: {
+            addListener: function (fn) {
+              bsaListener = fn;
+            }
+          },
+          sendMessage: function () {},
+          lastError: undefined
+        }
+      };
+
+      const rowsEl = document.getElementById('rows');
+      for (let i = 1; i <= 60; i++) {
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML =
+          '<span>ROW ' + i + '</span><span>NO' + (10000 + i) + '.jpg</span>' +
+          '<input type="checkbox" id="cb' + i + '">';
+        rowsEl.appendChild(row);
+      }
+    </script>
+
+    <script src="../content.js"></script>
+
+    <script>
+      const out = document.getElementById('out');
+      const started = Date.now();
+
+      function runTest(action) {
+        if (!bsaListener) {
+          out.textContent = 'FAIL: content.js did not register onMessage listener';
+          return;
+        }
+        bsaListener(
+          { source: 'BSA', type: 'RUN', action: action, options: { autoScroll: true, stepDelay: 30, clickDelay: 0 } },
+          {},
+          function (res) {
+            const boxes = Array.prototype.slice.call(document.querySelectorAll('#rows input[type="checkbox"]'));
+            const checked = boxes.filter(function (b) {
+              return b.checked;
+            }).length;
+            let verdict = 'FAIL';
+            if (action === 'select' && checked === boxes.length) verdict = 'PASS';
+            if (action === 'clear' && checked === 0) verdict = 'PASS';
+            out.textContent =
+              verdict + ' action=' + action + ' checked=' + checked + '/' + boxes.length +
+              ' response=' + JSON.stringify(res) + ' ms=' + (Date.now() - started);
+          }
+        );
+      }
+
+      setTimeout(function () {
+        runTest('select');
+      }, 400);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Bulk Select All — Quick start</title>
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; padding: 40px 20px 60px;
+        background: radial-gradient(900px 500px at 50% -10%, #14324a 0%, #0b1520 55%, #08111a 100%);
+        color: #e8eef5; font: 15px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+        min-height: 100vh;
+      }
+      .wrap { max-width: 760px; margin: 0 auto; }
+      .hero { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; }
+      .hero img { width: 56px; height: 56px; border-radius: 14px; }
+      h1 { margin: 0; font-size: 26px; letter-spacing: -0.2px; }
+      .sub { color: #93a9bd; margin: 2px 0 26px; }
+      .card {
+        background: #0f1c28; border: 1px solid #1e3446; border-radius: 14px;
+        padding: 18px 20px; margin-bottom: 14px;
+      }
+      h2 { margin: 0 0 10px; font-size: 15px; color: #7dd3fc; letter-spacing: 0.2px; text-transform: uppercase; }
+      ol, ul { margin: 0; padding-left: 22px; }
+      li { margin: 6px 0; }
+      code, kbd {
+        background: #16283a; border: 1px solid #24425a; border-radius: 5px;
+        padding: 1px 6px; font-family: ui-monospace, Consolas, monospace; font-size: 13px; color: #cfe4f5;
+      }
+      kbd { font-family: inherit; }
+      .tip { color: #9fb6cb; font-size: 13.5px; }
+      .accent { color: #4ade80; font-weight: 600; }
+      a { color: #7dd3fc; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="hero">
+        <img src="icons/icon128.png" alt="" />
+        <div>
+          <h1>Bulk Select All</h1>
+          <p class="sub">Select checkboxes, images and files in bulk with one click</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Quick start</h2>
+        <ol>
+          <li>Open the page with the list you want to download (each row has a checkbox).</li>
+          <li>On the floating panel (bottom-right) click <span class="accent">Select + scroll to bottom</span> — or open the toolbar popup.</li>
+          <li>Leave the tab open: the extension scrolls the list, waits for lazily loaded rows and checks everything.</li>
+          <li>When it finishes, use the page's own Download button as usual.</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h2>Tips</h2>
+        <ul>
+          <li>Shortcut: <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd> (change it at <code>edge://extensions/shortcuts</code>).</li>
+          <li>Enable <span class="accent">Auto-select on page load</span> to check everything automatically the next time you open that site.</li>
+          <li>Nothing happens? The page was opened before the extension was installed — open the popup and click <span class="accent">Reload page</span> (or press F5).</li>
+          <li>Virtualized lists (only a few rows rendered): keep auto-scroll on, the extension scrolls step by step and checks every row.</li>
+          <li>Slow page? Raise <span class="accent">Wait per scroll step</span> to 500–800&nbsp;ms in the popup.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Settings</h2>
+        <p class="tip">Open the extension popup → <span class="accent">Advanced settings</span> to tune click delay, scroll speed, idle rounds, “Select all” header preference and scroll restore.</p>
+      </div>
+    </div>
+  </body>
+</html>
