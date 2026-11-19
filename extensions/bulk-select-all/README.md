@@ -74,10 +74,10 @@ tools/               test harnesses and helper scripts
 Self-contained harnesses (stub `chrome.*`, no extension install needed). Run them from the repository root:
 
 ```powershell
-# list + auto-scroll (60 rows)
+$repo = (Get-Location).Path -replace '\\', '/'
 & 'C:\Program Files\Google\Chrome\Application\chrome.exe' --headless=new --disable-gpu `
   --allow-file-access-from-files --virtual-time-budget=60000 --dump-dom `
-  "file:///$PWD/extensions/bulk-select-all/tools/test-harness.html"
+  "file:///$repo/extensions/bulk-select-all/tools/test-harness.html"
 ```
 
 Other harnesses:
